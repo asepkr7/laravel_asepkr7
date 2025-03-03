@@ -23,7 +23,7 @@ $("ul.sidebar-menu li a").each(function () {
 
 // datatable
 $(document).ready(function () {
-    $("#Table")
+    $("#dataTable")
         .DataTable({
             responsive: true,
             lengthChange: true,

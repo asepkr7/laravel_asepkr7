@@ -29,7 +29,17 @@ class RumahSakitController extends Controller
      */
     public function store(Request $request)
     {
-        //
+         $validatedData=$request->validate([
+        'nama' => 'required|string',
+        'alamat' => 'required|string',
+        'email' => 'required|email|unique:rumah_sakits,email',
+        'telepon' =>  ['required', 'regex:/^(\+62|0)[0-9]{9,13}$/'],
+
+    ]);
+
+    RumahSakit::create($validatedData);
+
+    return redirect()->route('rumah-sakit.index')->with('success', 'Data berhasil disimpan.');
     }
 
     /**
@@ -43,24 +53,36 @@ class RumahSakitController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(RumahSakit $rumah_sakit)
     {
-        //
+        return View('rumah_sakit.edit', compact('rumah_sakit'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, RumahSakit $rumah_sakit)
     {
-        //
+         $validatedData=$request->validate([
+        'nama' => 'required|string',
+        'alamat' => 'required|string',
+        'email' => 'required|email',
+        'telepon' =>  ['required', 'regex:/^(\+62|0)[0-9]{9,13}$/'],
+
+    ]);
+
+     RumahSakit::where('id',$rumah_sakit->id)
+        ->update($validatedData);
+
+         return redirect()->route('rumah-sakit.index')->with('success', 'Data berhasil di update.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(RumahSakit $rumah_sakit)
     {
-        //
+        $rumah_sakit->delete();
+        return response()->json(['success' => 'Data Berhasil dihapus']);
     }
 }

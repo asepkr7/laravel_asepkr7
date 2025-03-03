@@ -19,12 +19,12 @@
     </li>
     <li class="nav-item active">
         <a class="nav-link" href="{{ route('rumah-sakit.index') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <i class="fas fa-fw fa-hospital-o" aria-hidden="true"></i>
             <span>Rumah Sakit</span></a>
     </li>
     <li class="nav-item active">
         <a class="nav-link" href="{{ route('pasien.index') }}">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
+            <i class="fas fa-fw fa-person"></i>
             <span>Pasien</span></a>
     </li>
 
