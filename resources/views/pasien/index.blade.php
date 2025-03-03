@@ -6,6 +6,15 @@
              <i class="fas fa-plus"></i> Tambah
          </a>
      </div>
+     <div class="mb-3">
+         <label for="filterRumahSakit">Filter Rumah Sakit:</label>
+         <select id="filterRumahSakit" class="form-control">
+             <option value="">Semua</option>
+             @foreach ($rumahSakits as $rs)
+                 <option value="{{ $rs->id }}">{{ $rs->nama }}</option>
+             @endforeach
+         </select>
+     </div>
      <!-- DataTales Example -->
      <div class="card shadow mb-4">
          <div class="card-header py-3">
@@ -50,29 +59,29 @@
                              <tr>
                                  <th>Nama</th>
                                  <th>Alamat</th>
-                                 <th>Email</th>
                                  <th>Telepon</th>
                                  <th>Rumah Sakit</th>
                                  <th>Aksi</th>
                              </tr>
                          </thead>
 
-                         <tbody>
+                         <tbody id="pasienTableBody">
                              @if ($rumahSakits->isEmpty())
                                  <tr>
                                      <td colspan="5" class="text-center">Data Kosong</td>
                                  </tr>
                              @else
-                                 @foreach ($rumahSakits as $rs)
-                                     <tr>
-                                         <td>{{ $rs->nama }}</td>
-                                         <td>{{ $rs->alamat }}</td>
-                                         <td>{{ $rs->email }}</td>
-                                         <td>{{ $rs->telepon }}</td>
+                                 @foreach ($pasiens as $pasien)
+                                     <tr id="row-{{ $pasien->id }}">
+                                         <td>{{ $pasien->nama }}</td>
+                                         <td>{{ $pasien->alamat }}</td>
+                                         <td>{{ $pasien->telepon }}</td>
+                                         <td>{{ $pasien->rumahSakit->nama }}</td>
                                          <td>
-                                             <button class="btn btn-warning btn-sm">Edit</button>
+                                             <a href="{{ route('pasien.edit', $pasien->id) }}"
+                                                 class="btn btn-warning btn-sm">Edit</a>
                                              <button class="btn btn-danger btn-sm"
-                                                 onclick="deleteData({{ $rs->id }})">Hapus</button>
+                                                 onclick="deleteData({{ $pasien->id }})">Hapus</button>
                                          </td>
                                      </tr>
                                  @endforeach
@@ -82,4 +91,66 @@
                  </div>
              </div>
          </div>
+         <script>
+             document.getElementById('filterRumahSakit').addEventListener('change', function() {
+                 let rumahSakitId = this.value;
+                 fetch(`/pasien/filter/${rumahSakitId}`)
+                     .then(response => response.json())
+                     .then(data => {
+                         let tableBody = document.getElementById('pasienTableBody');
+                         tableBody.innerHTML = '';
+                         if (data.length === 0) {
+                             tableBody.innerHTML =
+                                 '<tr><td colspan="5" class="text-center">Tidak ada data pasien</td></tr>';
+                         } else {
+                             data.forEach(pasien => {
+                                 tableBody.innerHTML += `
+                            <tr id="row-${pasien.id}">
+                                <td>${pasien.nama}</td>
+                                <td>${pasien.alamat}</td>
+                                <td>${pasien.telepon}</td>
+                                <td>${pasien.rumah_sakit.nama}</td>
+                                <td>
+                                    <button
+                                                 class="btn
+                                         btn-warning btn-sm">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteData(${pasien.id})">Hapus</button>
+                                </td>
+                            </tr>`;
+                             });
+                         }
+                     });
+             });
+
+             function deleteData(id) {
+                 Swal.fire({
+                     title: 'Apakah Anda yakin?',
+                     text: 'Data akan dihapus secara permanen!',
+                     icon: 'warning',
+                     showCancelButton: true,
+                     confirmButtonColor: '#d33',
+                     cancelButtonColor: '#3085d6',
+                     confirmButtonText: 'Ya, Hapus!'
+                 }).then((result) => {
+                     if (result.isConfirmed) {
+                         $.ajax({
+                             url: '/pasien/' + id,
+                             type: 'DELETE',
+                             headers: {
+                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                             },
+                             success: function(response) {
+                                 Swal.fire('Terhapus!', response.success, 'success');
+                                 $('#row-' + id).fadeOut(300, function() {
+                                     $(this).remove();
+                                 });
+                             },
+                             error: function(xhr) {
+                                 Swal.fire('Error!', 'Gagal menghapus data.', 'error');
+                             }
+                         });
+                     }
+                 });
+             }
+         </script>
      @endsection
